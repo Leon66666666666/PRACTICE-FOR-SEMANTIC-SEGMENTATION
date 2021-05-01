@@ -19,9 +19,9 @@ import numpy as np
 import models
 #from deeplab import Deeplabv3
 
-CLASS_NUMBERS = 19  # 分几类，这里分两类
-HEIGHT = 512  # 图片的长
-WIDHT = 256  # 图片的宽
+CLASS_NUMBERS = 32  # 分几类，这里分两类
+HEIGHT = 416  # 图片的长
+WIDHT = 416  # 图片的宽
 batch_size = 4  # 一次处理的图片数
 
 
@@ -137,10 +137,7 @@ def generate_arrays_from_file(lines, batch_size):
             # print(img.size)
             img = img.resize((WIDHT, HEIGHT))  # 改变图片的大小->(416,416)
             img_array = np.array(img)  # 图片转换成数组
-            img_array = tf.image.random_flip_left_right(img_array)  # data augmentation
-            img_array = tf.image.random_flip_up_down(img_array)  # data augmentation
-            img_array = tf.image.random_brightness(img_array, max_delta=0.5)#data augmentation
-            print('训练数据shape:', img_array.shape)
+
 
             img_array = img_array / 255  # 标准化 img_array.shape=（416，416，3）
 
