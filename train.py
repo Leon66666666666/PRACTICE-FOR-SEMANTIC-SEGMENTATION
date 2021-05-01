@@ -19,22 +19,22 @@ import numpy as np
 import models
 #from deeplab import Deeplabv3
 
-CLASS_NUMBERS = 32  # 分几类，这里分两类
-HEIGHT = 416  # 图片的长
-WIDHT = 416  # 图片的宽
-batch_size = 4  # 一次处理的图片数
+CLASS_NUMBERS = 32  # number of classification
+HEIGHT = 416 
+WIDHT = 416 
+batch_size = 4  
 
 
 def customied_loss(y_true, y_pred):
-    """ 自定义损失函数"""
+    """ loss function"""
     loss = categorical_crossentropy(y_true, y_pred)
     return loss
 
 
 def get_model():
-    """ 获取模型，并加载官方预训练的模型参数 """
+    """ load model """
 
-    # 获取模型
+   
     model = models.main()
     # model.summary() cache_subdir='models_dir'
 
@@ -51,7 +51,7 @@ def get_model():
     # load parameters
     model.load_weights(weights_path, by_name=True)
 
-    # 编译
+
     model.compile(loss=customied_loss, optimizer=Adam(1e-5), metrics=['accuracy'])
 
     return model
@@ -59,22 +59,22 @@ def get_model():
 
 def get_data():
     """
-    获取获取样本和标签对应的行；获取训练集和验证集的数量
-    :return: lines: 样本和标签的对应行；[num_train,num_val] 训练集和验证集数量
+    extract the training dataset and validation dataset
+   
     """
 
-    # 读取训练样本和样本对应关系的文件 lines => ['1.jpg;1.png\n', '10.jpg;10.png\n',.....]
-    # .jpg:样本 ； .png: 标签
+    
+   
     with open('Datasets/dataset/trainData/train.txt', 'r') as f:
         lines = f.readlines()
     # print(lines)
 
-    # 打乱行，打乱数据有利于训练
-    np.random.seed(10101)  # 设置随机种子，
+    # disorder the image sequnence 
+    np.random.seed(10101)  
     np.random.shuffle(lines)
     np.random.seed(None)
 
-    # 切分训练样本，90% 训练；10% 验证
+    # 30% for validation and 70% for training
     num_val = int(len(lines) * 0.3)
     num_train = len(lines) - num_val
     # print(num_val)
@@ -83,12 +83,12 @@ def get_data():
 
 
 def set_callbacks():
-    """ 设置回调函数"""
+    """ callback function"""
 
     # 1. 有关回调函数的设置（callbacks)
     logdir = os.path.join("callbacks")
     print(logdir)
-    if not os.path.exists(logdir):  # 如果没有文件夹
+    if not os.path.exists(logdir):  
         os.mkdir(logdir)
     output_model_file = os.path.join(logdir, 'ep{epoch:03d}-loss{loss:.3f}-val_loss{val_loss:.3f}.h5')
     callbacks = [
@@ -103,58 +103,56 @@ def set_callbacks():
 
 def generate_arrays_from_file(lines, batch_size):
     """
-    生成器，读取图片，并对图片处理，生成（样本，标签）
-    :param lines: 样本和标签的对应行 ：（119.jpg;119.png)=(样本，标签）
-    :param batch_size: 一次处理的图片数
-    :return:  返回 （样本，标签）
+    generator
+     
     """
 
-    numbers = len(lines)  # 传进来样本数据的总长度
+    numbers = len(lines)  
 
-    read_line = 0  # 读取的行，是否读取完一个周期（所有）数据
+    read_line = 0  
     while True:
 
-        train_data = []  # 样本
-        train_label = []  # 标签
+        train_data = []  # training dataset
+        train_label = []  # label
 
-        # 一次获取batch_size大小的数据
+        # batch_size
 
         for t in range(batch_size):
 
             # print(t)
-            # 如果读取完一个周期数据，后，将数据打乱,重新开始
+            # when the one epoch is done, disorder the images sequnence 
             if read_line == 0:
                 np.random.shuffle((lines))
 
-            # 处理训练样本 dataset/jpg ：训练图片；dataset/png：训练图片的标签
+            
 
-            # 1. 获取训练文件的名字，名字如，42.jpg
+            # 1. extract  the names of triaining data
             train_x_name = lines[read_line].split(';')[0]
 
-            # 根据图片名字读取图片
+            # feed the images to the networks according the name
             img = Image.open('Datasets/dataset/trainData/trainpng' + '/' + train_x_name)
             # img.show()
             # print(img.size)
-            img = img.resize((WIDHT, HEIGHT))  # 改变图片的大小->(416,416)
-            img_array = np.array(img)  # 图片转换成数组
+            img = img.resize((WIDHT, HEIGHT))  # resize
+            img_array = np.array(img)  #  image to array
 
 
-            img_array = img_array / 255  # 标准化 img_array.shape=（416，416，3）
+            img_array = img_array / 255  # normalization
 
-            train_data.append(img_array)  # 添加到训练样本
+            train_data.append(img_array)  # 
 
-            # 2. 获取训练样本标签的名字,名字如：42.png；标签是一张图片
+            # labels
             train_y_name = lines[read_line].split(";")[1].replace('\n', '')
 
-            # 根据图片名字读取图片
+            # 
             img = Image.open('Datasets/dataset/trainData/labelpng' + '/' + train_y_name)
             # img.show()
             # print(train_y_name)
-            img = img.resize((int(WIDHT / 2), int(HEIGHT / 2)))  # 改变图片大小 -> (208,208)。标签（图片）大小208*208
-            img_array = np.array(img)  # 图片转换成数组 img_array.shape=(208,208,3)
-            # img_array,三个通道数相同，没法做交叉熵计算，所以要进行下面“图层分层”
+            img = img.resize((int(WIDHT / 2), int(HEIGHT / 2)))  
+            img_array = np.array(img)  
+          
 
-            # 生成标签，标签的shape是(208,208,class_numbers)=(208,208,2),里面的值全为0
+            # create the set for labels
             labels = np.zeros((int(HEIGHT / 2), int(WIDHT / 2), CLASS_NUMBERS))
             # print('label shape: ', labels.shape)
 
@@ -176,21 +174,21 @@ def generate_arrays_from_file(lines, batch_size):
 
 
 def main():
-    # 获取已建立的模型，并加载官方与训练参数，模型编译
+    # main function
     model = get_model()
-    # 打印模型摘要
+   
     # model.summary()
 
-    # 获取样本（训练集&验证集） 和标签的对应关系，trian_num,val_num
+    # get the images and labels
     lines, train_nums, val_nums = get_data()
 
-    # 设置回调函数 并返回保存的路径
+    # callback function
     callbacks, logdir = set_callbacks()
 
-    # 生成样本和标签
+    # get the training data and labels
     generate_arrays_from_file(lines, batch_size=4)
 
-    # 训练
+    # training
     model.fit_generator(generate_arrays_from_file(lines[:train_nums], batch_size),
                         steps_per_epoch=max(1, train_nums // batch_size),
                         epochs=80, callbacks=callbacks,
@@ -198,7 +196,7 @@ def main():
                         validation_steps=max(1, val_nums // batch_size),
                         initial_epoch=0)
 
-    save_weight_path = os.path.join(logdir,'final.h5') # 保存模型参数的路径
+    save_weight_path = os.path.join(logdir,'final.h5') # save the results
 
     model.save_weights(save_weight_path)
 
