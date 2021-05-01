@@ -156,18 +156,14 @@ def generate_arrays_from_file(lines, batch_size):
             labels = np.zeros((int(HEIGHT / 2), int(WIDHT / 2), CLASS_NUMBERS))
             # print('label shape: ', labels.shape)
 
-            # 下面将(208,208,3) => (208,208,2),不仅是通道数的变化，还有，
-            # 原本背景和斑马线在一个通道里面，现在将斑马线和背景放在不同的通道里面。
-            # 如，labels,第0通道放背景，是背景的位置，显示为1，其余位置显示为0
-            # labels, 第1通道放斑马线，图上斑马线的位置，显示1，其余位置显示为0
-            # 相当于合并的图层分层！！！！
+            
             for cn in range(CLASS_NUMBERS):  # range(0,2) => 0,1
-                # 标签数组中，斑马线的值为1，其他为0 （三个通道值相同！！！），所以下面选第0通道
+               
                 labels[:, :, cn] = (img_array[:] == cn).astype(int)
             labels = np.reshape(labels, (-1, CLASS_NUMBERS))  # (208,208,2)=>(208*208,2)
             train_label.append(labels)
 
-            # 遍历所有数据，记录现在所处的行，读取完所有数据后，read_line=0,上面会打乱，重新开始
+            
             read_line = (read_line + 1) % numbers
 
         yield (np.array(train_data), np.array(train_label))
