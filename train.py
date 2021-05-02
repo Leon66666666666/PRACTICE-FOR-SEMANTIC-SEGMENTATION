@@ -21,7 +21,6 @@ import cv2
 import deeplab
 import segnet
 import models
-import torch
 CLASS_NUMBERS = 19  # classification numbers
 
 WIDHT = 416
