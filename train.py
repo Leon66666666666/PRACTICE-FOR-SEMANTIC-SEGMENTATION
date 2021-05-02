@@ -20,7 +20,7 @@ import numpy as np
 import cv2
 import deeplab
 import segnet
-import models
+import segnet
 CLASS_NUMBERS = 19  # classification numbers
 
 WIDHT = 416
@@ -83,17 +83,17 @@ def get_model():
     model = deeplab.main()
     # model.summary() cache_subdir='models_dir'
 
-    # 下载模型参数
+    # VGG OR resnet model
     WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
     filename = 'vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'  # 下载后保存的文件名
     checksum = '3e9f4e4f77bbe2c9bec13b53ee1c2319'
     weights_path = get_file(filename, WEIGHTS_PATH_NO_TOP, cache_subdir='models')
     # print(weights_path)
 
-    # 加载参数
+    # load the initial weight
     model.load_weights(weights_path, by_name=True)
 
-    # 编译
+    # complie
     model.compile(loss=customied_loss, optimizer=Adam(1e-3), metrics=['accuracy'])
 
     return model
