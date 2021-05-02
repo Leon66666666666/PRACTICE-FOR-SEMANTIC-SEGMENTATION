@@ -5,6 +5,8 @@
 # @File : predict.py
 # @Software: PyCharm
 import mobilenet
+import segnet
+import models
 import numpy as np
 import os, copy
 from PIL import Image
