@@ -226,7 +226,7 @@ def generate_arrays_from_file(lines, batch_size):
 def main():
     # load models
     model = get_model()
-    # 打印模型摘要
+    
     # model.summary()
     lines, train_nums, val_nums = input_data()
 
@@ -244,7 +244,7 @@ def main():
                         validation_steps=max(1, val_nums // batch_size),
                         initial_epoch=0)
 
-    save_weight_path = os.path.join(logdir,'result.h5') # 保存模型参数的路径
+    save_weight_path = os.path.join(logdir,'result.h5') # final weight
 
     model.save_weights(save_weight_path)
 
