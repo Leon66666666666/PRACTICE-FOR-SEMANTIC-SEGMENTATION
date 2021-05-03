@@ -63,7 +63,7 @@ class Evaluation(object):
         # return each category pixel accuracy(A more accurate way to call it precision)
         # acc = (TP) / TP + FP
         classAcc = np.diag(self.confusionMatrix) / self.confusionMatrix.sum(axis=1)
-        return classAcc  # 返回的是一个列表值，如：[0.90, 0.80, 0.96]，表示类别1 2 3各类别的预测准确率
+        return classAcc  # return the list which contains the accuracy of each prediction,like [0.9,0.8],represents the accuracies of the class 1 and 2
 
     def Recall(self):
         Re=np.diag(self.confusionMatrix)/self.confusionMatrix.sum(axis=0)
@@ -71,20 +71,20 @@ class Evaluation(object):
 
     def meanPixelAccuracy(self):
         classAcc = self.precision()
-        meanAcc = np.nanmean(classAcc)  # np.nanmean 求平均值，nan表示遇到Nan类型，其值取为0
-        return meanAcc  # 返回单个值，如：np.nanmean([0.90, 0.80, 0.96, nan, nan]) = (0.90 + 0.80 + 0.96） / 3 =  0.89
+        meanAcc = np.nanmean(classAcc)  # determine the mean value, NaN indicates the denominator might zero
+        return meanAcc  # np.nanmean([0.90, 0.80, 0.96, nan, nan]) = (0.90 + 0.80 + 0.96） / 3 =  0.89
 
     def meanIntersectionOverUnion(self):
         # Intersection = TP Union = TP + FP + FN
         # IoU = TP / (TP + FP + FN)
-        intersection = np.diag(self.confusionMatrix)  # 取对角元素的值，返回列表
+        intersection = np.diag(self.confusionMatrix)  # extrac the diagonal elements
         union = np.sum(self.confusionMatrix, axis=1) + np.sum(self.confusionMatrix, axis=0) - np.diag(
-            self.confusionMatrix)  # axis = 1表示混淆矩阵行的值，返回列表； axis = 0表示取混淆矩阵列的值，返回列表
-        IoU = intersection / union  # 返回列表，其值为各个类别的IoU
-        mIoU = np.nanmean(IoU)  # 求各类别IoU的平均
+            self.confusionMatrix)  # axis = 1 is the rows of confusion matrix； axis = 0 means the colume of confusion matrix
+        IoU = intersection / union  # determine the IoU
+        mIoU = np.nanmean(IoU)  
         return mIoU
 
-    def genConfusionMatrix(self, imgPredict, imgLabel):  # 同FCN中score.py的fast_hist()函数
+    def genConfusionMatrix(self, imgPredict, imgLabel):  # like the function in the FCN,score.py,fast_hist()
         # remove classes from unlabeled pixels in gt image and predict
         mask = (imgLabel >= 0) & (imgLabel < self.numClass)
         label = self.numClass * imgLabel[mask] + imgPredict[mask]
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     print(f_score)
     print(len(f_score))
     print('pa is : %f' % pa)
-    print('cpa is :')  # 列表
+    print('cpa is :')  # list
     print(precision)
     print('mpa is : %f' % mpa)
     print('mIoU is : %f' % mIoU)
