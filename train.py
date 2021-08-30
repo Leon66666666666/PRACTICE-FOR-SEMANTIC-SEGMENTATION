@@ -85,7 +85,7 @@ def get_model():
 
     # VGG OR resnet model
     WEIGHTS_PATH_NO_TOP = 'https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'
-    filename = 'vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'  # 下载后保存的文件名
+    filename = 'vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5'  # initial weight
     checksum = '3e9f4e4f77bbe2c9bec13b53ee1c2319'
     weights_path = get_file(filename, WEIGHTS_PATH_NO_TOP, cache_subdir='models')
     # print(weights_path)
